@@ -1,0 +1,49 @@
+# Backup settings
+# This file will contain your credentials. Set permissions so that the only
+# users that can read it is the one running the script.
+
+# For credentials, only uncomment the set of credentials you will be using
+
+# Amazon S3 credentials
+AWS_ACCESS_KEY_ID=your_access_key_id
+AWS_SECRET_ACCESS_KEY=your_secret_access_key
+# AWS_DEFAULT_REGION=us-east-1
+
+# Backblaze B2 credentials
+# B2_ACCOUNT_ID=your_b2_account_id
+# B2_ACCOUNT_KEY=your_b2_key
+
+# Storing the repository on Backblaze B2
+# You can use different directory prefixes for each backup repo
+# so they can share a bucket without interference.
+# RESTIC_REPOSITORY=b2:your-restic-backups-bucket:dir-prefix
+
+# Storing the repository on Amazon S3
+# RESTIC_REPOSITORY=s3:s3.amazonaws.com/your-restic-backups-bucket
+
+# If you're using a non-Amazon S3 provider, specify the HTTPS endpoint
+RESTIC_REPOSITORY=s3:https://s3.example.com/your-restic-backups-bucket
+
+# This is used as the encryption key for your backups. If you lose it,
+# you won't be able to restore anything.
+RESTIC_PASSWORD=your-encryption-key
+
+# If you want to exclude some directories from your backups, list
+# them in an exclude file and set EXCLUDE_FILE
+# EXCLUDE_FILE=--exclude-file=example-excludes
+
+# Uncomment if you only want to dry-run and not actually write any data
+# to the backup repository
+# DRYRUN=--dry-run
+
+# What paths should be backed up?
+BACKUP_PATHS=/mnt/coolfiles/share /mnt/uncoolfiles
+
+# Backup snapshot retention policy
+# How many snapshots do we want to keep around?
+MINIMUM_SNAPSHOTS_RETAINED=4
+HOURS_RETAINED=48
+DAYS_RETAINED=14
+WEEKS_RETAINED=8
+MONTHS_RETAINED=12
+YEARS_RETAINED=5
