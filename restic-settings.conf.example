@@ -34,7 +34,7 @@ RESTIC_PASSWORD=your-encryption-key
 
 # Uncomment if you only want to dry-run and not actually write any data
 # to the backup repository
-# DRYRUN=--dry-run
+# DRY_RUN=--dry-run
 
 # What paths should be backed up? Use spaces to separate paths.
 BACKUP_PATHS=/mnt/coolfiles/share /mnt/uncoolfiles
