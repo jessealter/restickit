@@ -68,6 +68,10 @@ die "Usage: $0 preferences_file\n" unless $prefs_f;
 my $config = read_config_file($prefs_f);
 %ENV = ( %ENV, %$config );
 
+my @backup_paths = split( ' ', $ENV{BACKUP_PATHS} || "" );
+confess "BACKUP_PATHS not defined. What should we be backing up?"
+  unless @backup_paths;
+
 show_params();
 
 # If you're backing up a filesystem that you're mounting by FUSE, the inode
@@ -81,7 +85,7 @@ my @cmd = (
 
     # "-o b2.connections=15",
     grep { defined }
-      ( $ENV{EXCLUDE_FILE}, $ENV{DRY_RUN}, $ENV{BACKUP_PATHS}, @ARGV ),
+      ( $ENV{EXCLUDE_FILE}, $ENV{DRY_RUN}, @backup_paths, @ARGV ),
 );
 system(@cmd);
 

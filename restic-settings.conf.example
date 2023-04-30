@@ -36,7 +36,7 @@ RESTIC_PASSWORD=your-encryption-key
 # to the backup repository
 # DRYRUN=--dry-run
 
-# What paths should be backed up?
+# What paths should be backed up? Use spaces to separate paths.
 BACKUP_PATHS=/mnt/coolfiles/share /mnt/uncoolfiles
 
 # Backup snapshot retention policy
