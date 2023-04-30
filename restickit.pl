@@ -89,12 +89,12 @@ my @cmd = (
 );
 system(@cmd);
 
-# We don't want to prune any snapshots if this backup failed
+# We don't want to remove any snapshots if this backup failed
 if ( $? != 0 ) {
     confess "restic backup failed";
 }
 
-# Prune backup snapshots
+# Remove old backup snapshots
 @cmd = (
     "restic",   "forget",     "--verbose", "--tag",
     "periodic", "--group-by", "paths,tags",
@@ -112,7 +112,7 @@ my %policy = (
 # Need at least one of these defined
 unless ( grep { defined } values %policy ) {
     confess
-"Error: You must define at a retention policy, or we can't prune snapshots";
+"Error: You must define at a retention policy, or we can't remove snapshots";
 }
 
 foreach my $param ( keys %policy ) {
@@ -120,6 +120,9 @@ foreach my $param ( keys %policy ) {
         push @cmd, ( "--$param", $policy{$param} );
     }
 }
+
+# Do a dry-run if specified in settings file
+push @cmd, ( $ENV{DRY_RUN} // "" );
 
 system(@cmd);
 
