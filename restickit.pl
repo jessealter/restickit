@@ -6,7 +6,7 @@ use strict;
 use warnings;
 
 use Carp        qw(confess);
-use File::Which qw(which);
+use IPC::Cmd qw(can_run);
 use constant DEBUG => $ENV{DEBUG};
 use feature 'say';
 
@@ -56,7 +56,7 @@ sub show_params {
     debug "Yearly snapshots:\t",  $ENV{YEARS_RETAINED}  // "undefined";
 }
 
-confess "Can't find restic in \$PATH!" unless which('restic');
+confess "Can't find restic in \$PATH!" unless can_run('restic');
 
 # Our first argument is the settings file to source to get our backup
 # parameters, so peel it off. We'll pass all the other arguments directly
