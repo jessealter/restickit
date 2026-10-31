@@ -78,15 +78,20 @@ show_params();
 # information is misleading at best, so add --ignore-inode.
 my @cmd = (
     "restic", "backup",
-    "--verbose=2",
+    "--verbose=1",
     "--exclude=.duplicacy",
     "--exclude=.DS_Store",
     "--tag", "periodic",
 
     # "-o b2.connections=15",
-    grep { defined }
-      ( $ENV{EXCLUDE_FILE}, $ENV{DRY_RUN}, @backup_paths, @ARGV ),
 );
+
+# Optional flags go before the paths so nothing forwarded can swallow them
+push @cmd, $ENV{EXCLUDE_FILE}
+  if defined $ENV{EXCLUDE_FILE} && length $ENV{EXCLUDE_FILE};
+push @cmd, $ENV{DRY_RUN} if defined $ENV{DRY_RUN} && length $ENV{DRY_RUN};
+push @cmd, @backup_paths, @ARGV;
+
 system(@cmd);
 
 # We don't want to remove any snapshots if this backup failed
@@ -122,7 +127,7 @@ foreach my $param ( keys %policy ) {
 }
 
 # Do a dry-run if specified in settings file
-push @cmd, ( $ENV{DRY_RUN} // "" );
+push @cmd, $ENV{DRY_RUN} if defined $ENV{DRY_RUN} && length $ENV{DRY_RUN};
 
 system(@cmd);
 
@@ -131,7 +136,7 @@ if ( $? != 0 ) {
 }
 
 # Copyright 2023 Joe Block <jpb@unixorn.net>
-# Copyright 2023 Jesse Alter <jesse@jessealter.com>
+# Copyright 2026 Jesse Alter <jesse@jessealter.com>
 
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
