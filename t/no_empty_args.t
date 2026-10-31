@@ -37,7 +37,9 @@ sub run_restickit {
     print {$c} "BACKUP_PATHS = /tmp/a /tmp/b\n";
     print {$c} "EXCLUDE_FILE = /tmp/excludes\n";
     print {$c} "MINIMUM_SNAPSHOTS_RETAINED = 5\n";
-    print {$c} "DRY_RUN = --dry-run\n" if $opts{dry_run};
+    if ( defined $opts{dry_run} ) {
+        print {$c} "DRY_RUN = $opts{dry_run}\n";
+    }
     close $c;
 
     unlink $log_file;
@@ -47,7 +49,10 @@ sub run_restickit {
 
     my $out = `$^X $script $conf 2>&1`;
     my $rc  = $?;
-    my $tag = 'DRY_RUN ' . ( $opts{dry_run} ? 'set' : 'unset' );
+    my $tag =
+        !defined $opts{dry_run} ? 'DRY_RUN unset'
+      : length $opts{dry_run}   ? "DRY_RUN=$opts{dry_run}"
+      : 'DRY_RUN set to empty string';
     is( $rc, 0, "$tag: restickit.pl exits 0" ) or diag "output: $out";
 
     open my $l, '<', $log_file or die "open log: $!";
@@ -64,10 +69,12 @@ sub run_restickit {
     return @invocations;
 }
 
-for my $dry ( 0, 1 ) {
-    my $tag  = 'DRY_RUN ' . ( $dry ? 'set' : 'unset' );
-    my @inv  = run_restickit( dry_run => $dry );
-    my $fail = $inv[0] ? '' : 1;
+for my $dry ( undef, '--dry-run', '' ) {
+    my $tag =
+        !defined $dry  ? 'DRY_RUN unset'
+      : length $dry    ? "DRY_RUN=$dry"
+      :                  'DRY_RUN set to empty string';
+    my @inv = run_restickit( dry_run => $dry );
     is( scalar @inv, 2, "$tag: two restic invocations (backup, forget)" );
     next unless @inv == 2;
 
@@ -78,7 +85,7 @@ for my $dry ( 0, 1 ) {
           or diag 'bad args: ', explain \@bad;
     }
 
-    if ($dry) {
+    if ( defined $dry && length $dry ) {
         ok( scalar( grep { $_ eq '--dry-run' } @{ $inv[0] } ),
             "$tag: backup args include --dry-run" );
         ok( scalar( grep { $_ eq '--dry-run' } @{ $inv[1] } ),

@@ -84,12 +84,14 @@ my @cmd = (
     "--tag", "periodic",
 
     # "-o b2.connections=15",
-    grep { defined }
-      ( $ENV{EXCLUDE_FILE}, @backup_paths, @ARGV ),
 );
 
-# Do a dry-run if specified
-push @cmd, $ENV{DRY_RUN} if defined $ENV{DRY_RUN};
+# Optional flags go before the paths so nothing forwarded can swallow them
+push @cmd, $ENV{EXCLUDE_FILE}
+  if defined $ENV{EXCLUDE_FILE} && length $ENV{EXCLUDE_FILE};
+push @cmd, $ENV{DRY_RUN} if defined $ENV{DRY_RUN} && length $ENV{DRY_RUN};
+push @cmd, @backup_paths, @ARGV;
+
 system(@cmd);
 
 # We don't want to remove any snapshots if this backup failed
@@ -125,7 +127,7 @@ foreach my $param ( keys %policy ) {
 }
 
 # Do a dry-run if specified in settings file
-push @cmd, $ENV{DRY_RUN} if defined $ENV{DRY_RUN};
+push @cmd, $ENV{DRY_RUN} if defined $ENV{DRY_RUN} && length $ENV{DRY_RUN};
 
 system(@cmd);
 
