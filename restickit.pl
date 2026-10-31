@@ -78,7 +78,7 @@ show_params();
 # information is misleading at best, so add --ignore-inode.
 my @cmd = (
     "restic", "backup",
-    "--verbose=2",
+    "--verbose=1",
     "--exclude=.duplicacy",
     "--exclude=.DS_Store",
     "--tag", "periodic",
