@@ -47,7 +47,10 @@ sub run_restickit {
     local $ENV{RESTIC_LOG} = $log_file;
     delete local $ENV{DRY_RUN};
 
-    my $out = `$^X $script $conf 2>&1`;
+    # quotemeta the paths so spaces or shell metacharacters in the checkout
+    # directory or TMPDIR don't split them
+    my $cmd = join ' ', map { quotemeta } ( $^X, $script, $conf );
+    my $out = `$cmd 2>&1`;
     my $rc  = $?;
     my $tag =
         !defined $opts{dry_run} ? 'DRY_RUN unset'
