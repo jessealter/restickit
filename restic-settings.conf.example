@@ -28,6 +28,10 @@ RESTIC_REPOSITORY=s3:https://s3.example.com/your-restic-backups-bucket
 # you won't be able to restore anything.
 RESTIC_PASSWORD=your-encryption-key
 
+# Local cache directory restic uses for backups. If you load this env for
+# restore jobs, restores will use it too.
+RESTIC_CACHE_DIR=/var/cache/restickit
+
 # If you want to exclude some directories from your backups, list
 # them in an exclude file and set EXCLUDE_FILE
 # EXCLUDE_FILE=--exclude-file=example-excludes
