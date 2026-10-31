@@ -85,8 +85,11 @@ my @cmd = (
 
     # "-o b2.connections=15",
     grep { defined }
-      ( $ENV{EXCLUDE_FILE}, $ENV{DRY_RUN}, @backup_paths, @ARGV ),
+      ( $ENV{EXCLUDE_FILE}, @backup_paths, @ARGV ),
 );
+
+# Do a dry-run if specified
+push @cmd, $ENV{DRY_RUN} if defined $ENV{DRY_RUN};
 system(@cmd);
 
 # We don't want to remove any snapshots if this backup failed
@@ -122,7 +125,7 @@ foreach my $param ( keys %policy ) {
 }
 
 # Do a dry-run if specified in settings file
-push @cmd, ( $ENV{DRY_RUN} // "" );
+push @cmd, $ENV{DRY_RUN} if defined $ENV{DRY_RUN};
 
 system(@cmd);
 
@@ -131,7 +134,7 @@ if ( $? != 0 ) {
 }
 
 # Copyright 2023 Joe Block <jpb@unixorn.net>
-# Copyright 2023 Jesse Alter <jesse@jessealter.com>
+# Copyright 2026 Jesse Alter <jesse@jessealter.com>
 
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
