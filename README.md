@@ -23,3 +23,29 @@ If you want to read the settings file into your shell's environment, source it t
 ```bash
 source readenv.sh restic-settings.conf
 ```
+
+## Running tests
+
+```bash
+prove -lr t
+```
+
+or run a single test directly:
+
+```bash
+perl t/no_empty_args.t
+```
+
+## Preventing overlapping runs
+
+If a backup takes longer than its schedule, two runs of `restickit.pl` can overlap. You can wrap it with `flock` to make sure only one run happens at a time. If cron tries to fire another one, the new one will exit if you use `-n` and it will wait if you don't:
+
+```bash
+flock -n /var/run/restickit.lock restickit.pl restic-settings.conf
+```
+
+In a cron entry, that looks like:
+
+```cron
+0 0 * * * flock -n /var/run/restickit.lock restickit.pl /path/to/restic-settings.conf
+```
