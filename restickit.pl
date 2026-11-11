@@ -132,7 +132,7 @@ my %policy = (
 # Need at least one of these defined
 unless ( grep { defined } values %policy ) {
     confess
-"Error: You must define at a retention policy, or we can't remove snapshots";
+"Error: You must define a retention policy, or we can't remove snapshots";
 }
 
 foreach my $param ( keys %policy ) {
