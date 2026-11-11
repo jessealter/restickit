@@ -44,21 +44,31 @@ RESTIC_CACHE_DIR=/var/cache/restickit
 BACKUP_PATHS=/mnt/coolfiles/share /mnt/uncoolfiles
 
 # How snapshots are grouped before the retention policy is applied. host,paths is
-# restic's own default: one group per machine per path set, so a policy never
-# removes another machine's snapshots.
+# restic's own default: retention applies independently per machine/path group,
+# including other machines' groups. Only snapshots tagged periodic are
+# considered.
 GROUP_BY=host,paths
 
 # One group per machine instead, so backup paths can change freely:
 # GROUP_BY=host,tags
 #
-# No grouping at all -- one policy over every snapshot in the repository:
+# No grouping at all -- one policy over all snapshots tagged periodic:
 # GROUP_BY=
 
 # Backup snapshot retention policy
-# How many snapshots do we want to keep around?
-MINIMUM_SNAPSHOTS_RETAINED=4
-HOURS_RETAINED=48
-DAYS_RETAINED=14
-WEEKS_RETAINED=8
-MONTHS_RETAINED=12
-YEARS_RETAINED=5
+#
+# These count buckets, not time: a bucket is an hour, day, week, month or year
+# with at least one snapshot in it. The finest granularity set here therefore
+# acts like "keep the last N backups" when the job runs less often than that
+# granularity -- a weekly job with HOURS_RETAINED=48 keeps 48 weekly snapshots,
+# and DAYS_RETAINED=14 keeps 14 weeks.
+#
+# restic's own defaults keep nothing, and any numbers here would assume a
+# cadence you may not run, so none are set. Uncomment the policy that matches
+# your schedule; restickit exits if no retention option is defined.
+# MINIMUM_SNAPSHOTS_RETAINED=4
+# HOURS_RETAINED=48
+# DAYS_RETAINED=14
+# WEEKS_RETAINED=8
+# MONTHS_RETAINED=12
+# YEARS_RETAINED=5
