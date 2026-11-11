@@ -43,6 +43,17 @@ RESTIC_CACHE_DIR=/var/cache/restickit
 # What paths should be backed up? Use spaces to separate paths.
 BACKUP_PATHS=/mnt/coolfiles/share /mnt/uncoolfiles
 
+# How snapshots are grouped before the retention policy is applied. host,paths is
+# restic's own default: one group per machine per path set, so a policy never
+# removes another machine's snapshots.
+GROUP_BY=host,paths
+
+# One group per machine instead, so backup paths can change freely:
+# GROUP_BY=host,tags
+#
+# No grouping at all -- one policy over every snapshot in the repository:
+# GROUP_BY=
+
 # Backup snapshot retention policy
 # How many snapshots do we want to keep around?
 MINIMUM_SNAPSHOTS_RETAINED=4
