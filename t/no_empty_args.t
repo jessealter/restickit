@@ -37,6 +37,9 @@ sub run_restickit {
     print {$c} "BACKUP_PATHS = /tmp/a /tmp/b\n";
     print {$c} "EXCLUDE_FILE = /tmp/excludes\n";
     print {$c} "MINIMUM_SNAPSHOTS_RETAINED = 5\n";
+    if ( defined $opts{group_by} ) {
+        print {$c} "GROUP_BY = $opts{group_by}\n";
+    }
     if ( defined $opts{dry_run} ) {
         print {$c} "DRY_RUN = $opts{dry_run}\n";
     }
@@ -46,6 +49,7 @@ sub run_restickit {
     local $ENV{PATH}       = "$dir:$ENV{PATH}";
     local $ENV{RESTIC_LOG} = $log_file;
     delete local $ENV{DRY_RUN};
+    delete local $ENV{GROUP_BY};
 
     # quotemeta the paths so spaces or shell metacharacters in the checkout
     # directory or TMPDIR don't split them
@@ -100,6 +104,27 @@ for my $dry ( undef, '--dry-run', '' ) {
         ok( scalar( grep { /^--keep-/ } @{ $inv[1] } ),
             "$tag: forget args include --keep-* retention flags" );
     }
+}
+
+# GROUP_BY picks the forget grouping. Unset falls back to restic's own default;
+# an empty value is passed through untouched, because that is how grouping is
+# switched off.
+for my $case (
+    { label => 'GROUP_BY unset',      set => undef,        expect => 'host,paths' },
+    { label => 'GROUP_BY=host,tags',  set => 'host,tags',  expect => 'host,tags' },
+    { label => 'GROUP_BY=paths,tags', set => 'paths,tags', expect => 'paths,tags' },
+    { label => 'GROUP_BY empty',      set => '',           expect => '' },
+  )
+{
+    my @inv = run_restickit( group_by => $case->{set} );
+    is( scalar @inv, 2, "$case->{label}: two restic invocations (backup, forget)" )
+      or next;
+
+    my @forget = @{ $inv[1] };
+    my ($idx) = grep { $forget[$_] eq '--group-by' } 0 .. $#forget;
+    ok( defined $idx, "$case->{label}: forget args include --group-by" ) or next;
+    is( $forget[ $idx + 1 ], $case->{expect},
+        "$case->{label}: groups by $case->{expect}" );
 }
 
 done_testing();

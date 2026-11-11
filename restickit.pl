@@ -45,6 +45,10 @@ sub show_params {
     debug "BACKUP_PATHS:\t", $ENV{BACKUP_PATHS} // "undefined";
     debug "EXCLUDE_FILE:\t", $ENV{EXCLUDE_FILE} // "undefined";
     debug "DRY_RUN:\t",      $ENV{DRY_RUN}      // "undefined";
+    debug "GROUP_BY:\t",
+      !defined $ENV{GROUP_BY}  ? "undefined (default host,paths)"
+      : length $ENV{GROUP_BY}  ? $ENV{GROUP_BY}
+      :                          "empty (grouping disabled)";
     debug " ";
     debug "Retention settings:";
     debug "Minimum snapshots:\t",
@@ -71,6 +75,17 @@ my $config = read_config_file($prefs_f);
 my @backup_paths = split( ' ', $ENV{BACKUP_PATHS} || "" );
 confess "BACKUP_PATHS not defined. What should we be backing up?"
   unless @backup_paths;
+
+# How snapshots are grouped before the retention policy is applied. Left unset,
+# restic's own default (host,paths) applies, and the policy is then applied to
+# each machine/path group separately. Grouping does not narrow which snapshots
+# are considered: every snapshot tagged periodic is, including ones from other
+# machines sharing the repository. An empty value groups all of them under a
+# single policy. Grouping by host,tags keeps snapshots in one group as backup
+# paths change over time, where grouping by paths starts a new group whenever a
+# path is added or dropped and a group that stops receiving snapshots keeps them
+# forever.
+my $group_by = defined $ENV{GROUP_BY} ? $ENV{GROUP_BY} : 'host,paths';
 
 show_params();
 
@@ -101,8 +116,8 @@ if ( $? != 0 ) {
 
 # Remove old backup snapshots
 @cmd = (
-    "restic",   "forget",     "--verbose", "--tag",
-    "periodic", "--group-by", "paths,tags",
+    "restic",    "forget",     "--verbose", "--tag",
+    "periodic",  "--group-by", $group_by,
 );
 
 my %policy = (
@@ -117,7 +132,7 @@ my %policy = (
 # Need at least one of these defined
 unless ( grep { defined } values %policy ) {
     confess
-"Error: You must define at a retention policy, or we can't remove snapshots";
+"Error: You must define a retention policy, or we can't remove snapshots";
 }
 
 foreach my $param ( keys %policy ) {
